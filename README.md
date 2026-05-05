@@ -17,8 +17,8 @@ The diagram below shows the complete supply chain — from a developer pushing a
 ```mermaid
 flowchart TD
     subgraph SRC["  Code Change  "]
-        DEV("👨‍💻 Developer\nDockerfile change")
-        BOT("🤖 Renovate\nweekly digest bump")
+        DEV("Developer\nDockerfile change")
+        BOT("Renovate\nweekly digest bump")
     end
 
     DEV --> PR
@@ -28,12 +28,12 @@ flowchart TD
 
     subgraph CHECKS["  PR Checks  ·  pr-checks.yml  "]
         direction LR
-        A1["🔍 TruffleHog\nSecrets Scan"]
-        A2["📋 OPA / Conftest\nPolicy Check"]
-        A3["🐳 Docker Build\namd64 — no push"]
-        A4["🛡 Trivy\nCVE Gate\nCRIT / HIGH / MED"]
-        A5["📏 Dockle\nCIS Benchmark"]
-        A6["🧪 Structure Tests\n+ Goss Runtime"]
+        A1["TruffleHog\nSecrets Scan"]
+        A2["OPA / Conftest\nPolicy Check"]
+        A3["Docker Build\namd64 — no push"]
+        A4["Trivy\nCVE Gate\nCRIT / HIGH / MED"]
+        A5["Dockle\nCIS Benchmark"]
+        A6["Structure Tests\n+ Goss Runtime"]
         A3 --> A4
         A3 --> A5
         A3 --> A6
@@ -43,19 +43,19 @@ flowchart TD
 
     A1 & A2 & A4 & A5 & A6 --> GATE{"PR Check\nSummary"}
 
-    GATE -- "✗  fail" --> BLOCK(["❌ Merge blocked"])
-    GATE -- "✓  pass" --> MERGE(["Merge to main"])
+    GATE -- "fail" --> BLOCK(["Merge blocked"])
+    GATE -- "pass" --> MERGE(["Merge to main"])
 
     subgraph RELEASE["  Release Pipeline  ·  release.yml  "]
         direction LR
-        R1["🔍 Detect\nChanged Images"]
-        R2["🏗 Multi-arch Build\namd64 + arm64\nstandard + distroless"]
-        R3["🛡 Trivy\nPre-push Gate"]
-        R4["📦 Push to GHCR\nghcr.io/platform-images/*"]
-        R5["✍️ Cosign Sign\nKeyless OIDC"]
-        R6["📄 SBOM\nAttestation"]
-        R7["🔒 SLSA Level 2+\nProvenance"]
-        R8["🏷 Git Tag\n+ GitHub Release\nvX.Y.Z"]
+        R1["Detect\nChanged Images"]
+        R2["Multi-arch Build\namd64 + arm64\nstandard + distroless"]
+        R3["Trivy\nPre-push Gate"]
+        R4["Push to GHCR\nghcr.io/platform-images/*"]
+        R5["Cosign Sign\nKeyless OIDC"]
+        R6["SBOM\nAttestation"]
+        R7["SLSA Level 2+\nProvenance"]
+        R8["Git Tag\n+ GitHub Release\nvX.Y.Z"]
         R1 --> R2 --> R3 --> R4
         R4 --> R5 & R6 & R7
         R5 & R6 & R7 --> R8
@@ -73,7 +73,7 @@ flowchart TD
         direction LR
         C1["FROM ghcr.io/platform-images/*\npinned to digest"]
         C2["cosign verify\nsignature + provenance"]
-        C3["🚀 Production Workload\nnon-root · minimal attack surface"]
+        C3["Production Workload\nnon-root · minimal attack surface"]
         C1 --> C2 --> C3
     end
 
@@ -81,12 +81,12 @@ flowchart TD
 
     subgraph AUTO["  Scheduled Automation  "]
         direction LR
-        N1["⏰ Nightly\n02:00 UTC"]
+        N1["Nightly\n02:00 UTC"]
         N2["Trivy — All\nPublished Tags"]
-        N3["📋 CVE Issue\nopened / updated / closed"]
-        M1["📅 Monthly\n1st of month"]
+        N3["CVE Issue\nopened / updated / closed"]
+        M1["Monthly\n1st of month"]
         M2["endoflife.date\nAPI Check"]
-        M3["📋 EOL Warning\nor Critical Issue"]
+        M3["EOL Warning\nor Critical Issue"]
         N1 --> N2 --> N3
         M1 --> M2 --> M3
     end
