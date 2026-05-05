@@ -38,12 +38,12 @@ jobs:
     name: Secrets Scan
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6.0.2
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
 
       - name: TruffleHog OSS — scan PR delta for secrets
-        uses: trufflesecurity/trufflehog@main
+        uses: trufflesecurity/trufflehog@17456f8c7d042d8c82c9a8ca9e937231f9f42e26 # v3.95.2
         with:
           path: ./
           base: ${{ github.event.pull_request.base.sha || 'HEAD~1' }}
@@ -55,7 +55,7 @@ jobs:
     name: Policy Check (OPA/Conftest)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6.0.2
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Install conftest
         run: |
@@ -78,7 +78,7 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
       has_changes: ${{ steps.set-matrix.outputs.has_changes }}
     steps:
-      - uses: actions/checkout@v6.0.2
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       # Manual trigger — build the matrix directly from the input
       - name: Set matrix from workflow_dispatch input
@@ -93,7 +93,7 @@ jobs:
           fi
 
       # PR trigger — detect only what changed
-      - uses: dorny/paths-filter@v4.0.1
+      - uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4.0.1
         if: github.event_name != 'workflow_dispatch'
         id: filter
         with:
@@ -137,15 +137,15 @@ jobs:
       matrix:
         image: ${{ fromJSON(needs.detect-changes.outputs.matrix) }}
     steps:
-      - uses: actions/checkout@v6.0.2
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4.0.0
+        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4.0.0
 
       # ── Standard variant ────────────────────────────────────────────────────
 
       - name: Build standard image (no push)
-        uses: docker/build-push-action@v7.1.0
+        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7.1.0
         with:
           context: images/${{ matrix.image }}
           file: images/${{ matrix.image }}/Dockerfile
@@ -159,7 +159,7 @@ jobs:
           cache-to: type=gha,scope=${{ matrix.image }},mode=max
 
       - name: Trivy CVE scan — standard
-        uses: aquasecurity/trivy-action@v0.36.0
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           image-ref: ${{ matrix.image }}:pr
           format: table
@@ -207,7 +207,7 @@ jobs:
 
       - name: Build distroless image (no push)
         if: hashFiles(format('images/{0}/Dockerfile.distroless', matrix.image)) != ''
-        uses: docker/build-push-action@v7.1.0
+        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7.1.0
         with:
           context: images/${{ matrix.image }}
           file: images/${{ matrix.image }}/Dockerfile.distroless
@@ -222,7 +222,7 @@ jobs:
 
       - name: Trivy CVE scan — distroless
         if: hashFiles(format('images/{0}/Dockerfile.distroless', matrix.image)) != ''
-        uses: aquasecurity/trivy-action@v0.36.0
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           image-ref: ${{ matrix.image }}:pr-distroless
           format: table

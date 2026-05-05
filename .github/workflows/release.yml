@@ -38,7 +38,7 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
       has_changes: ${{ steps.set-matrix.outputs.has_changes }}
     steps:
-      - uses: actions/checkout@v6.0.2
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       # Manual trigger — build the matrix directly from the input
       - name: Set matrix from workflow_dispatch input
@@ -53,7 +53,7 @@ jobs:
           fi
 
       # Push trigger — detect only what changed
-      - uses: dorny/paths-filter@v4.0.1
+      - uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4.0.1
         if: github.event_name != 'workflow_dispatch'
         id: filter
         with:
@@ -97,7 +97,7 @@ jobs:
       matrix:
         image: ${{ fromJSON(needs.detect-changes.outputs.matrix) }}
     steps:
-      - uses: actions/checkout@v6.0.2
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
 
@@ -120,10 +120,10 @@ jobs:
 
       # ── Build amd64 only first — scan before committing to a multi-arch push ─
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4.0.0
+        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4.0.0
 
       - name: Build standard (amd64, local) for scanning
-        uses: docker/build-push-action@v7.1.0
+        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7.1.0
         with:
           context: images/${{ matrix.image }}
           file: images/${{ matrix.image }}/Dockerfile
@@ -136,7 +136,7 @@ jobs:
             GIT_REVISION=${{ github.sha }}
 
       - name: Trivy CVE scan — pre-push gate
-        uses: aquasecurity/trivy-action@v0.36.0
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           image-ref: ${{ matrix.image }}:scan
           format: table
@@ -155,7 +155,7 @@ jobs:
           > dockle-report-${{ matrix.image }}.json
 
       - name: Upload Dockle report
-        uses: actions/upload-artifact@v7.0.1
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: dockle-${{ matrix.image }}-${{ steps.version.outputs.semver }}
           path: dockle-report-${{ matrix.image }}.json
@@ -163,18 +163,18 @@ jobs:
 
       # ── Log in and push multi-arch standard image ────────────────────────────
       - name: Log in to GHCR
-        uses: docker/login-action@v4.1.0
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up QEMU (for arm64 emulation)
-        uses: docker/setup-qemu-action@v4.0.0
+        uses: docker/setup-qemu-action@ce360397dd3f832beb865e1373c09c0e9f86d70a # v4.0.0
 
       - name: Build + push standard (multi-arch)
         id: build-standard
-        uses: docker/build-push-action@v7.1.0
+        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7.1.0
         with:
           context: images/${{ matrix.image }}
           file: images/${{ matrix.image }}/Dockerfile
@@ -194,7 +194,7 @@ jobs:
       - name: Build + push distroless (multi-arch)
         id: build-distroless
         if: hashFiles(format('images/{0}/Dockerfile.distroless', matrix.image)) != ''
-        uses: docker/build-push-action@v7.1.0
+        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7.1.0
         with:
           context: images/${{ matrix.image }}
           file: images/${{ matrix.image }}/Dockerfile.distroless
@@ -212,10 +212,10 @@ jobs:
 
       # ── Syft SBOM + GitHub SBOM attestation ─────────────────────────────────
       - name: Install Cosign
-        uses: sigstore/cosign-installer@v4.1.1
+        uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003 # v4.1.1
 
       - name: Install Syft
-        uses: anchore/sbom-action/download-syft@v0.24.0
+        uses: anchore/sbom-action/download-syft@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
 
       - name: Generate SBOM — standard
         run: |
@@ -224,7 +224,7 @@ jobs:
             --file sbom-standard.spdx.json
 
       - name: Attest SBOM — standard
-        uses: actions/attest-sbom@v2
+        uses: actions/attest-sbom@bd218ad0dbcb3e146bd073d1d9c6d78e08aa8a0b # v2
         with:
           subject-name: ${{ env.REGISTRY }}/${{ env.ORG }}/${{ matrix.image }}
           subject-digest: ${{ steps.build-standard.outputs.digest }}
@@ -240,7 +240,7 @@ jobs:
 
       - name: Attest SBOM — distroless
         if: steps.build-distroless.outcome == 'success'
-        uses: actions/attest-sbom@v2
+        uses: actions/attest-sbom@bd218ad0dbcb3e146bd073d1d9c6d78e08aa8a0b # v2
         with:
           subject-name: ${{ env.REGISTRY }}/${{ env.ORG }}/${{ matrix.image }}
           subject-digest: ${{ steps.build-distroless.outputs.digest }}
@@ -261,7 +261,7 @@ jobs:
 
       # ── SLSA Level 2+ build provenance attestation ───────────────────────────
       - name: Attest build provenance — standard
-        uses: actions/attest-build-provenance@v4.1.0
+        uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32 # v4.1.0
         with:
           subject-name: ${{ env.REGISTRY }}/${{ env.ORG }}/${{ matrix.image }}
           subject-digest: ${{ steps.build-standard.outputs.digest }}
@@ -269,7 +269,7 @@ jobs:
 
       - name: Attest build provenance — distroless
         if: steps.build-distroless.outcome == 'success'
-        uses: actions/attest-build-provenance@v4.1.0
+        uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32 # v4.1.0
         with:
           subject-name: ${{ env.REGISTRY }}/${{ env.ORG }}/${{ matrix.image }}
           subject-digest: ${{ steps.build-distroless.outputs.digest }}
@@ -285,7 +285,7 @@ jobs:
           git push origin "$TAG"
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v3.0.0
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
         with:
           tag_name: release/${{ matrix.image }}/v${{ steps.version.outputs.semver }}
           name: "${{ matrix.image }} v${{ steps.version.outputs.semver }}"
