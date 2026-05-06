@@ -9,6 +9,16 @@ command:
     exit-status: 0
     stdout:
       - "/[0-9]+\\.[0-9]+\\./"
+  nonroot-passwd-entry:
+    exec: "grep -c '^nonroot:' /etc/passwd"
+    exit-status: 0
+    stdout:
+      - "1"
+  nonroot-group-entry:
+    exec: "grep -c '^nonroot:' /etc/group"
+    exit-status: 0
+    stdout:
+      - "1"
 
 file:
   /usr/bin/node:
